@@ -115,8 +115,6 @@ include("../includes/row-hover-style.js.php");
 
 include("./kassekladde_includes/bilagsmatch.php");
 
-include("./kassekladde_includes/bilagsmatch.php");
-
 include("../includes/grid.php");
 
 // --- Kassekladde column visibility (user-toggleable columns) ---
