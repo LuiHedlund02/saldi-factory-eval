@@ -219,11 +219,6 @@ if ($r = db_fetch_array(db_select($qtxt, __FILE__ . " linje " . __LINE__))) {
 		db_modify($qtxt, __FILE__ . " linje " . __LINE__);
 	}
 }
-$qtxt = "SELECT data_type FROM information_schema.columns WHERE table_name = 'batch_kob' and  column_name = 'due_date'";
-if (!db_fetch_array(db_select($qtxt, __FILE__ . " linje " . __LINE__))) {
-	$qtxt = "ALTER TABLE batch_kob ADD due_date date";
-	db_modify($qtxt, __FILE__ . " linje " . __LINE__);
-}
 
 $qtxt = "SELECT data_type FROM information_schema.columns WHERE table_name = 'settings' and  column_name = 'group_id'";
 if (!db_fetch_array(db_select($qtxt, __FILE__ . " linje " . __LINE__))) {
