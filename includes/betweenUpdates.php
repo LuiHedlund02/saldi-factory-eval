@@ -772,4 +772,3 @@ $qtxt = "update varer set lukket = '0' where lukket is NULL";
 db_modify($qtxt, __FILE__ . " linje " . __LINE__);
 
 ?>
-
