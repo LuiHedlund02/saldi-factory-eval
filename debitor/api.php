@@ -146,14 +146,15 @@
 
             // Save error response in temp folder
             file_put_contents("../temp/$db/Update-company-error-$timestamp.json", json_encode($error, JSON_UNESCAPED_UNICODE)."\n".json_encode($data, JSON_UNESCAPED_UNICODE));
-
-            return ['success' => false, 'message' => 'Error updating company: ' . htmlspecialchars(json_encode($errorMessage, JSON_PRETTY_PRINT))];
+            
+            return ['success' => false, 'message' => 'Error updating company: ' . (is_string($errorMessage) ? $errorMessage : json_encode($errorMessage))];
         } else if (isset($response["hasEndpointPeppol"]) && (false === $response["hasEndpointPeppol"])) {
             return ['success' => false,
                 'message' => 'CVR is already registered in Semantics elsewhere, you have to cancel that first.',
                 'response' => $response,
                 'status code' => $httpCode
             ];
+            return ['success' => false, 'message' => 'Error updating company: ' . json_encode($errorMessage, JSON_PRETTY_PRINT)];
         }
 
         // Save successful response in temp folder for debugging
@@ -236,7 +237,12 @@
         if(db_num_rows($query) == 0){
             $query = db_select("SELECT var_value FROM settings WHERE var_name = 'companyID' AND var_grp = 'easyUBL'", __FILE__ . " linje " . __LINE__);
             if(db_num_rows($query) > 0){
-                updateCompany();
+                $update_return_object = updateCompany();
+                if($update_return_object['success']) {
+                    $companyID = $update_return_object['companyId'];
+                } else {
+                    die($update_return_object['message']);
+                }
                 $query = db_modify("INSERT INTO settings (var_name, var_grp, var_value) VALUES ('updatedCompany', 'easyUBL', 'true')", __FILE__ . " linje " . __LINE__);
             }
         }
