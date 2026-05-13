@@ -4662,7 +4662,6 @@ document.addEventListener('DOMContentLoaded', function() {
 ?>
 
 <!-- Add clip drag-and-drop JavaScript for linking documents between lines #20260513 --> 
-
 <style>
 	/* Clip drag and drop styles */
 	.clip-cell {
