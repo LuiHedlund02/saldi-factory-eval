@@ -29,6 +29,7 @@
 // 20260518 NTR - Changed address fetch logic, such that multiple spaces doesn't result in a incorrect address
 // &&           - Changed the total logic, such that values above a thousand doesn't cut it to the thousands. aka. 27,010.40 became 27 due to the ,
 // 20260609 CL/PHR - Null-check på EasyUBL-svar: tomt svar (HTTP 500) ved kreditnotaer giver nu dansk fejlbesked i stedet for "null"
+// 20260623 NTR - Added a , check on Addresses as sometimes people write extra information that is useless to us.
 
     @session_start();
     $s_id=session_id();
@@ -72,9 +73,9 @@
             "defaultAddress" => [
                 "name" => $res["firmanavn"],
                 "department" => "",
-                "streetName" => explode(" ",$res["addr1"])[0],
+                "streetName" => implode(" ", explode(" ", explode(",", $res["addr1"])[0], -1)), // ## 20260518 - NTR - Fixed streetName to include all words except last (building number)
+                "buildingNumber" => array_slice(explode(" ", explode(",", $res["addr1"])[0]), -1)[0], // ## 20260518 - NTR - Fixed buildingNumber to use last word of address instead of second word
                 "additionalStreetName" => $res["addr2"],
-                "buildingNumber" => array_slice(explode(" ", $res["addr1"]),-1)[0],
                 "inhouseMail" => "",
                 "cityName" => $res["bynavn"],
                 "postalCode" => $res["postnr"],
@@ -344,7 +345,7 @@
             
             ?>
             <script>
-                alert("Transmission fejl:\n\n<?php echo htmlspecialchars($displayError); ?>\n\nFejllogging gemt til debugging. Kontakt support hvis problemet persister.");
+                alert("Transmission fejl:\n\n<?= json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) ?>\n\nFejllogging gemt til debugging. Kontakt support hvis problemet persister.");
             </script>
             <?php
             exit;
@@ -495,9 +496,8 @@
         // Delivery address - use best available address
         if($levAddr1 !== "" && $levBynavn !== "" && $levPostnr !== ""){
             $deliverAddress = [
-                
-                "streetName" => implode(" ", explode(" ", $levAddr1, -1)), ## 20260518 - NTR - Street name without building number.
-                "buildingNumber" => array_slice(explode(" ", $levAddr1), -1)[0],
+                "streetName" => implode(" ", explode(" ", explode(",", $levAddr1)[0], -1)), // ## 20260518 - NTR - Fixed streetName to include all words except last (building number)
+                "buildingNumber" => array_slice(explode(" ", explode(",", $levAddr1)[0]), -1)[0], // ## 20260518 - NTR - Fixed buildingNumber to use last word of address instead of second word
                 "inhouseMail" => $r_faktura["email"],
                 "additionalStreetName" => $levAddr2,
                 "attentionName" => $levKontakt,
@@ -510,8 +510,8 @@
         }else if($customerAddr1 !== "" && $customerBynavn !== "" && $customerPostnr !== ""){
             // 20260604 - Fallback to main address if delivery address is incomplete
             $deliverAddress = [
-                "streetName" => implode(" ", explode(" ", $customerAddr1, -1)),
-                "buildingNumber" => array_slice(explode(" ", $customerAddr1), -1)[0],
+                "streetName" => implode(" ", explode(" ", explode(",", $customerAddr1)[0], -1)), // ## 20260518 - NTR - Fixed streetName to include all words except last (building number)
+                "buildingNumber" => array_slice(explode(" ", explode(",", $customerAddr1)[0]), -1)[0], // ## 20260518 - NTR - Fixed buildingNumber to use last word of address instead of second word
                 "inhouseMail" => $r_faktura["email"],
                 "additionalStreetName" => $customerAddr2,
                 "attentionName" => $customerKontakt,
@@ -554,8 +554,8 @@
                 "name" => $r_faktura["firmanavn"],
                 "companyId" => $cvrnr_with_prefix,
                 "postalAddress" => [
-                    "streetName" => implode(" ", explode(" ", $customerAddr1, -1)), ## 20260604 - Updated to use fallback address logic
-                    "buildingNumber" => array_slice(explode(" ", $customerAddr1), -1)[0], ## 20260604 - Updated to use fallback address logic
+                    "streetName" => implode(" ", explode(" ", explode(",", $customerAddr1)[0], -1)), ## 20260604 - Updated to use fallback address logic
+                    "buildingNumber" => array_slice(explode(" ", explode(",", $customerAddr1)[0]), -1)[0], ## 20260604 - Updated to use fallback address logic
                     "inhouseMail" => $r_faktura["email"],
                     "additionalStreetName" => $customerAddr2,
                     "attentionName" => $customerKontakt,
@@ -742,7 +742,7 @@
         if($r_faktura["lev_addr1"] !== ""){
             $deliverAddress = [
                 "streetName" => $r_faktura["lev_addr1"],
-                "buildingNumber" => array_slice(explode(" ", $r_faktura["lev_addr1"]), -1)[0],
+                "buildingNumber" => array_slice(explode(" ", explode(",", $r_faktura["lev_addr1"])[0]), -1)[0],
                 "inhouseMail" => $r_faktura["email"],
                 "additionalStreetName" => $r_faktura["lev_addr2"],
                 "attentionName" => $r_faktura["lev_kontakt"],
@@ -758,8 +758,8 @@
                 "name" => $r_faktura["firmanavn"],
                 "companyId" => "DK $r_faktura[ean]",
                 "postalAddress" => [
-                    "streetName" => implode(" ", explode(" ", $r_faktura["addr1"], -1)), // ## 20260518 - NTR - Fixed streetName to include all words except last (building number)
-                    "buildingNumber" => array_slice(explode(" ", $r_faktura["addr1"]), -1)[0], // ## 20260518 - NTR - Fixed buildingNumber to use last word of address instead of second word
+                    "streetName" => implode(" ", explode(" ", explode(",", $r_faktura["addr1"])[0], -1)), // ## 20260518 - NTR - Fixed streetName to include all words except last (building number)
+                    "buildingNumber" => array_slice(explode(" ", explode(",", $r_faktura["addr1"])[0]), -1)[0], // ## 20260518 - NTR - Fixed buildingNumber to use last word of address instead of second word
                     "inhouseMail" => $r_faktura["email"],
                     "additionalStreetName" => $r_faktura["addr2"],
                     "attentionName" => $r_faktura["firmanavn"],
@@ -829,8 +829,8 @@
                 "name" => $r_faktura["firmanavn"],
                 "companyId" => "DK$r_faktura[cvrnr]",
                 "postalAddress" => [
-                    "streetName" => implode(" ", explode(" ", $r_faktura["addr1"], -1)), // ## 20260518 - NTR - Fixed streetName to include all words except last (building number)
-                    "buildingNumber" => array_slice(explode(" ", $r_faktura["addr1"]), -1)[0], // ## 20260518 - NTR - Fixed buildingNumber to use last word of address instead of second word
+                    "streetName" => implode(" ", explode(" ", explode(",", $r_faktura["addr1"])[0], -1)), // ## 20260518 - NTR - Fixed streetName to include all words except last (building number)
+                    "buildingNumber" => array_slice(explode(" ", explode(",", $r_faktura["addr1"])[0]), -1)[0], // ## 20260518 - NTR - Fixed buildingNumber to use last word of address instead of second word
                     "inhouseMail" => $r_faktura["email"],
                     "additionalStreetName" => $r_faktura["addr2"],
                     "attentionName" => $r_faktura["firmanavn"],
@@ -853,8 +853,8 @@
                 "name" => $r_faktura["firmanavn"],
                 "companyId" => "DK$r_faktura[cvrnr]33557799",
                 "postalAddress" => [
-                    "streetName" => implode(" ", explode(" ", $r_faktura["addr1"], -1)), // ## 20260518 - NTR - Fixed streetName to include all words except last (building number)
-                    "buildingNumber" => array_slice(explode(" ", $r_faktura["addr1"]), -1)[0], // ## 20260518 - NTR - Fixed buildingNumber to use last word of address instead of second word
+                    "streetName" => implode(" ", explode(" ", explode(",", $r_faktura["addr1"])[0], -1)), // ## 20260518 - NTR - Fixed streetName to include all words except last (building number)
+                    "buildingNumber" => array_slice(explode(" ", explode(",", $r_faktura["addr1"])[0]), -1)[0], // ## 20260518 - NTR - Fixed buildingNumber to use last word of address instead of second word
                     "inhouseMail" => $r_faktura["email"],
                     "additionalStreetName" => $r_faktura["addr2"],
                     "attentionName" => $r_faktura["firmanavn"],
