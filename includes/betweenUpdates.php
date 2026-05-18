@@ -34,42 +34,10 @@
 // 20260611 LOE rename fax to mobile and changed orderdate to ordredate, orders to ordrer.
 // 20260617 NTR Added missing rental settings
 
-#####
-$qtxt = "SELECT column_name
-         FROM information_schema.columns
-         WHERE table_name = 'adresser'
-         AND column_name = 'fax'";
 
-if (db_fetch_array(db_select($qtxt, __FILE__ . " linje " . __LINE__))) {
-    $qtxt = "ALTER TABLE adresser RENAME COLUMN fax TO mobile";
-    db_modify($qtxt, __FILE__ . " linje " . __LINE__);
-}
-
-#####
-
-
-$qtxt = "update grupper set box8 = '' where art = 'DIV' and kodenr = '2' and box8 like 'ftp2.ebconnect.dk%'";
-db_modify($qtxt, __FILE__ . " linje " . __LINE__);
-
-$qtxt = "update varer set lukket = '0' where lukket is NULL";
-db_modify($qtxt, __FILE__ . " linje " . __LINE__);
-
-
-$qtxt = "SELECT data_type FROM information_schema.columns WHERE table_name = 'varer' and  column_name = 'provision'";
+$qtxt = "SELECT data_type FROM information_schema.columns WHERE table_name = 'varer' and column_name = 'provision'";
 if (!db_fetch_array(db_select($qtxt, __FILE__ . " linje " . __LINE__))) {
 	$qtxt = "ALTER TABLE varer ADD provision integer";
-	db_modify($qtxt, __FILE__ . " linje " . __LINE__);
-}
-
-$qtxt = "SELECT data_type FROM information_schema.columns WHERE table_name = 'adresser' and  column_name = 'iban'";
-if (!db_fetch_array(db_select($qtxt, __FILE__ . " linje " . __LINE__))) {
-	$qtxt = "ALTER TABLE adresser ADD iban varchar(40)";
-	db_modify($qtxt, __FILE__ . " linje " . __LINE__);
-}
-
-$qtxt = "SELECT data_type FROM information_schema.columns WHERE table_name = 'adresser' and  column_name = 'swift'";
-if (!db_fetch_array(db_select($qtxt, __FILE__ . " linje " . __LINE__))) {
-	$qtxt = "ALTER TABLE adresser ADD swift varchar(15)";
 	db_modify($qtxt, __FILE__ . " linje " . __LINE__);
 }
 
