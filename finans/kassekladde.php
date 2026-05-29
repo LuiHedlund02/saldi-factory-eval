@@ -467,6 +467,10 @@ if ($_GET) {
 	$kredit[$x]      =  trim(if_isset($kredit, 		'',		[$x]));
 	$faktura[$x]     =  trim(if_isset($faktura, 	'',		[$x]));
 	$belob[$x]       =  trim(if_isset($belob, 		'',		[$x]));
+	if ($kksort) {
+		if ($kkdir_get == 'desc') $kkdir = 'desc'; else $kkdir = 'asc';
+		db_modify("update grupper set box1='" . db_escape_string($kksort) . "', box4='" . db_escape_string($kkdir) . "' where ART='KASKL' and kode='1' and kodenr='$bruger_id'", __FILE__ . " linje " . __LINE__);
+	}
 	$existing_row = null;
 
 	// Persistent Sorting
