@@ -438,7 +438,6 @@ if ($_GET) {
 	$sort            =       if_isset($_GET, 		null,   ['sort']);
 	$kksort          =       if_isset($_GET,        null,   ['kksort']); #sortering i kassekladde
 	$kkdir_get       =       if_isset($_GET,        null,   ['kkdir']);
-	$kladde_id       = (int) if_isset($_GET,        0,      'kladde_id');
 	$funktion        =       if_isset($_GET, 		null,	['funktion']);
 	$x               = (int) if_isset($_GET, 		0,      ['x']);
 	$id[$x]          =       if_isset($_GET, 		null,	['id']);
