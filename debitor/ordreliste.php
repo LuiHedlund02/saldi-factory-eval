@@ -51,6 +51,7 @@
 // 20260519 CL/PHR pos_ordre betalinger har negativt beløb i openpost — udlignet-check udvides med OR for amount ≈ -(sum+moms)
 // 20260601 CL/PHR Added debitorgruppe dropdown search filter on ordreliste (adresser.gruppe)
 // 20260601 Sawaneh Restored Felt 1-5 columns to read from ordrer (payment fields) and qualified their sqlOverride to o.felt_ to fix column on sort
+// 20260603 Sawaneh Whole order line is now clickable (and right-clickable for "open in new tab/window"), not just the order number.
 
 @session_start();
 $s_id = session_id();
@@ -220,6 +221,7 @@ print "<script LANGUAGE=\"JavaScript\" SRC=\"../javascript/moment.min.js\"></scr
 print "<script LANGUAGE=\"JavaScript\" SRC=\"../javascript/daterangepicker.min.js\" defer></script>";
 print '<link rel="stylesheet" type="text/css" href="../css/daterangepicker.css" />';
 include("../includes/row-hover-style-with-links.js.php");
+include("../includes/order-row-clickable.js.php"); // 20260603 Sawaneh whole order line clickable
 include("../includes/datepkr.php");
 
 
