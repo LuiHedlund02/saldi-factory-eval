@@ -98,6 +98,7 @@
 //                 without pos_betalinger rows are included when finding distinct betaling types
 // 20260523 CL/PHR function posbogfor: Changed order lookup query to LEFT JOIN with COALESCE(felt_1/valuta)
 //                 so art='DO' orders without pos_betalinger are passed to bogfor_nu
+// 20260601 Sawaneh Out-of-stock popup now also fires for sub-items of a samlesæt (set), not just the master varenr
 // 20260604 PHR change_cardvalue: (float)$ny_kortsum[$x] → usdecimal() — dansk format "12.378,02" blev tolket som 12.378
 @session_start();
 $s_id = session_id();
@@ -1502,13 +1503,32 @@ if ($vare_id) {
 					$rabat_ny *= 1;
 					db_modify("update ordrelinjer set rabat='$rabat_ny' where ordre_id='$id' and vare_id >'0' and rabat=0", __FILE__ . " linje " . __LINE__);
 				}
-				$qtxt = "select id,samlevare from varer where varenr = '$varenr_ny' or stregkode = '$varenr_ny'"; #20200929
+				$qtxt = "select id,samlevare,varenr from varer where varenr = '$varenr_ny' or stregkode = '$varenr_ny'"; #20200929
 				$r = db_fetch_array(db_select($qtxt, __FILE__ . " linje " . __LINE__));
 				#-- Out-of-stock warning gate (Håndtering af salg af udsolgte varer) --
 				$stockWarningConfirmed = (isset($_POST['stock_warning_confirmed']) && $_POST['stock_warning_confirmed'] == '1');
 				$stockWarningNote      = isset($_POST['stock_warning_note']) ? trim($_POST['stock_warning_note']) : '';
 				$stockWarningOn        = is_stock_warning_enabled();
 				$stockInfo             = $stockWarningOn ? check_stock_warning($r['id']) : array('out_of_stock' => false);
+				$swLogVareId           = $r['id']; 
+				if ($stockWarningOn && empty($stockInfo['out_of_stock']) && trim($r['samlevare']) === 'on') {
+					$qSub = db_select("select vare_id, antal from styklister where indgaar_i = '" . (int)$r['id'] . "' and vare_id is not null and vare_id > 0", __FILE__ . " linje " . __LINE__);
+					while ($rSub = db_fetch_array($qSub)) {
+						$subInfo = check_stock_warning((int)$rSub['vare_id']);
+						$subAntal = (float)$rSub['antal'];
+						$insufficient = ($subAntal > 0 && (float)$subInfo['beholdning'] < $subAntal);
+						if (!empty($subInfo['out_of_stock']) || $insufficient) {
+							$desc = trim((string)$subInfo['beskrivelse']) . ' (samlesæt: ' . (string)$r['varenr'];
+							if ($insufficient) $desc .= ', kræver ' . rtrim(rtrim(number_format($subAntal, 3, '.', ''), '0'), '.') . ' på lager: ' . rtrim(rtrim(number_format((float)$subInfo['beholdning'], 3, '.', ''), '0'), '.');
+							$desc .= ')';
+							$subInfo['beskrivelse']  = $desc;
+							$subInfo['out_of_stock'] = true;
+							$stockInfo   = $subInfo;
+							$swLogVareId = (int)$rSub['vare_id'];
+							break;
+						}
+					}
+				}
 				$blockOnStockWarning   = ($stockWarningOn && $stockInfo['out_of_stock'] && !$stockWarningConfirmed);
 				if ($blockOnStockWarning) {
 					$swPayload = array(
@@ -1541,9 +1561,10 @@ if ($vare_id) {
 					}
 					if ($stockWarningConfirmed && $stockWarningNote !== '' && $stockInfo['out_of_stock']) {
 						$swLinjeId = 0;
-						$rSW = db_fetch_array(db_select("select max(id) as lid from ordrelinjer where ordre_id = '$id' and varenr = '$varenr_ny'", __FILE__ . " linje " . __LINE__));
+						// Find the line for the item that was actually warned about (master or sub-item of a samlesæt).
+						$rSW = db_fetch_array(db_select("select max(id) as lid from ordrelinjer where ordre_id = '$id' and vare_id = '" . (int)$swLogVareId . "'", __FILE__ . " linje " . __LINE__));
 						if ($rSW && $rSW['lid']) $swLinjeId = $rSW['lid'];
-						log_stock_warning($id, $r['id'], $stockWarningNote, $swLinjeId);
+						log_stock_warning($id, $swLogVareId, $stockWarningNote, $swLinjeId);
 					}
 				}
 				if (!$blockOnStockWarning) {
