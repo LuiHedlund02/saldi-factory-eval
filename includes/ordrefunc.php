@@ -99,16 +99,16 @@
 // 20260604 CL/PHR function bogfor_nu: tightened POS-detection condition - felt_4, felt_5 must also be numeric and felt_5 > 0 to avoid regular orders being treated as POS
 
 function levering($id,$hurtigfakt,$genfakt,$webservice=false) {
-	/* echo "<!--function levering start-->"; */
-	#cho "$id,$hurtigfakt,$genfakt,$webservice<br>";
-	# Denne funktion kontrollerer levering of kalder funktioner som registrerer salget i tabellerne varer,batch_salg og ect batch_kob
-	global $afd_lager;
-	global $regnaar;
-	global $levdate;
-	global $lev_nr;
-	global $db,$db_skriv_id;
+/* echo "<!--function levering start-->"; */
+#cho "$id,$hurtigfakt,$genfakt,$webservice<br>";
+# Denne funktion kontrollerer levering of kalder funktioner som registrerer salget i tabellerne varer,batch_salg og ect batch_kob
+global $afd_lager;
+global $regnaar;
+global $levdate;
+global $lev_nr;
+global $db,$db_skriv_id;
 
-	$fejl=0;
+$fejl=0;
 
 	$lager = array();
 	#$fp=fopen("../temp/ordrelev.log","a");
@@ -159,8 +159,8 @@ function levering($id,$hurtigfakt,$genfakt,$webservice=false) {
 		}
 	}
 	#exit;
-	#transaktion(commit);
-	#xit;
+#transaktion(commit);
+#xit;
 	$q = db_select("select lev_nr from batch_salg where ordre_id = $id order by lev_nr", __FILE__ . " linje " . __LINE__);
 	while ($r = db_fetch_array($q)) {
 		if ($lev_nr <= $r['lev_nr']) {
@@ -201,9 +201,9 @@ function levering($id,$hurtigfakt,$genfakt,$webservice=false) {
 	}
 
 	#if ($hurtigfakt && !$fakturadate) {
-	#	$fakturadate=date("Y-m-d");
-	#	db_modify("update ordrer set fakturadate = '$fakturadate' where id = $id",__FILE__ . " linje " . __LINE__);
-	#}
+#	$fakturadate=date("Y-m-d");
+#	db_modify("update ordrer set fakturadate = '$fakturadate' where id = $id",__FILE__ . " linje " . __LINE__);
+#}
 
 	if ($hurtigfakt && $fakturadate && $fakturadate != $levdate) {
 		db_modify("update ordrer set levdate = fakturadate where id = $id", __FILE__ . " linje " . __LINE__);
@@ -239,7 +239,7 @@ function levering($id,$hurtigfakt,$genfakt,$webservice=false) {
 			$fakturadate = date('Y-m-d');
 			db_modify("update ordrer set fakturadate='$fakturadate' where id='$id'", __FILE__ . " linje " . __LINE__);
 			#		 #print "<meta http-equiv=\"refresh\" content=\"0;URL=fakturadato.php?id=$id&returside=levering.php&hurtigfakt=on\">";
-		#exit;
+#		exit;
 		}
 		if ($fejl == 0) {
 			$fakturanr = 1;
@@ -334,13 +334,12 @@ function levering($id,$hurtigfakt,$genfakt,$webservice=false) {
 					if ($leveres[$x] > $tidl_lev + $antal[$x])
 						$leveres[$x] = $antal[$x] - $tidl_lev;
 				}
-				// Limit return delivery, to amounts delivered.
 				if ($leveres[$x] < 0 && $art == 'DO') {
 					$tidl_lev_do = 0;
 					$qtxt = "select antal from batch_salg where linje_id = '$linje_id[$x]' and ordre_id='$id'";
 					$query = db_select($qtxt, __FILE__ . " linje " . __LINE__);
 					while ($row = db_fetch_array($query)) $tidl_lev_do = $tidl_lev_do + $row['antal'];
-					if ($tidl_lev_do > 0 && -$leveres[$x] > $tidl_lev_do) $leveres[$x] = $tidl_lev_do * -1;
+					if (abs($leveres[$x]) < abs($tidl_lev_do)) $leveres[$x] = $tidl_lev_do * -1;
 				}
 			}
 			for ($x = 1; $x <= $linjeantal; $x++) {
@@ -807,9 +806,9 @@ function krediter($id, $levdate, $beholdning, $vare_id, $antal, $pris, $linje_id
 	$tmp = $antal * -1;
 	db_modify("insert into batch_salg(vare_id, linje_id, salgsdate, ordre_id, antal,variant_id) values ($vare_id, $linje_id, '$levdate', $id, $tmp,'$variant_id')", __FILE__ . " linje " . __LINE__);
 	#	db_modify("insert into batch_kob(vare_id, linje_id, kobsdate, ordre_id, antal, rest) values ($vare_id, $linje_id, '$levdate', $id, $antal, $antal)",__FILE__ . " linje " . __LINE__);
-	#	$r=db_fetch_array(db_select("select max(id) as id from batch_kob where linje_id=$linje_id",__FILE__ . " linje " . __LINE__));
-	#	$q = db_select("select id from batch_kob where linje_id=$kred_linje_id",__FILE__ . " linje " . __LINE__);
-	#	$batch_kob_id=$r['id'];
+#	$r=db_fetch_array(db_select("select max(id) as id from batch_kob where linje_id=$linje_id",__FILE__ . " linje " . __LINE__));
+#	$q = db_select("select id from batch_kob where linje_id=$kred_linje_id",__FILE__ . " linje " . __LINE__);
+#	$batch_kob_id=$r['id'];
 	lagerstatus($vare_id, $variant_id, $lager, -$antal);
 	if ($serienr || $serienr == '0') {
 		$q = db_select("select * from serienr where salgslinje_id=-$kred_linje_id", __FILE__ . " linje " . __LINE__);
@@ -2303,7 +2302,8 @@ function bogfor_nu($id, $kilde) {
 		$felt_4 = $r['felt_4'];
 		$felt_5 = $r['felt_5'];
 		$betalings_id = $r['betalings_id'];
-		if ($felt_1 && is_numeric($felt_2) && is_numeric($felt_4) && is_numeric($felt_5) && (int)$felt_5 > 0) { #20171004 Alm. ordre der behandles som pos
+		// patch solution, felt_1 and 3 are tekst for payment, felt_2 and 4 are the amounts and felt 5 is the cash register number
+		if ($felt_1 && $felt_3 && is_numeric($felt_2) && is_numeric($felt_4) && is_numeric($felt_5) && (int)$felt_5 > 0) { #20171004 Alm. ordre der behandles som pos
 			$qtxt = "select id from pos_betalinger where ordre_id='$ordre_id' limit 1";
 			if (db_fetch_array(db_select($qtxt, __FILE__ . " linje " . __LINE__))) {
 				$art = 'PO';
@@ -3821,7 +3821,7 @@ function opret_ordrelinje($id, $vare_id, $varenr, $antal, $beskrivelse, $pris, $
 		if (!is_numeric($m_antal))
 			$m_antal = 0;
 		if (!$varegruppe) {
-			return ("Varenr $varenr er ikke tilknyttet en varegruppe!");
+			return ("Varenr $varenr et ikke tilknyttet en varegruppe!");
 		}
 		if (!$variant_id && in_array($vare_id, $variant_varer)) { //20181223
 			return ('Brug stregkode ved variant_varer');
@@ -3969,7 +3969,7 @@ function opret_ordrelinje($id, $vare_id, $varenr, $antal, $beskrivelse, $pris, $
 	if ($art == 'DO' && $lagerfort && !$webservice && $advar_negativ_lager) {  #20140131
 		$r = db_fetch_array(db_select("select beholdning from varer where id='$vare_id'", __FILE__ . " linje " . __LINE__));
 		$beholdning = $r['beholdning'];
-		$r = db_fetch_array(db_select("select sum(ordrelinjer.antal) as antal, sum(ordrelinjer.leveret) as leveret from ordrelinjer join ordrer on ordrelinjer.ordre_id=ordrer.id where ordrelinjer.vare_id='$vare_id' and ordrer.art='DO' and ordrer.status<3", __FILE__ . " linje " . __LINE__)); ## 20260423 Clarity
+		$r = db_fetch_array(db_select("select sum(ordrelinjer.antal) as antal, sum(ordrelinjer.leveret) as leveret from ordrelinjer,ordrer where ordrelinjer.vare_id='$vare_id' and ordrelinjer.ordre_id=ordrer.id and ordrer.art='DO' and ordrer.status<3", __FILE__ . " linje " . __LINE__));
 		$i_ordre = $r['antal'] - $r['leveret'];
 		$raadig = $beholdning - $i_ordre;
 		$tmp = $antal * 1;
@@ -4046,15 +4046,15 @@ function opret_ordrelinje($id, $vare_id, $varenr, $antal, $beskrivelse, $pris, $
 		else
 			$VatPrice = $pris + $pris * $varemomssats / 100;
 		#		if ($variant_type) {
-		#			$varianter=explode(chr(9),$variant_type);
-		#			for ($y=0;$y<count($varianter);$y++) {
-		#				$qtxt="select variant_typer.beskrivelse as vt_besk,varianter.beskrivelse as var_besk from variant_typer,varianter";
-		#				$qtxt.=" where variant_typer.id = '$varianter[$y]' and variant_typer.variant_id=varianter.id";
-		#				$r1=db_fetch_array(db_select($qtxt,__FILE__ . " linje " . __LINE__));
-		#				$beskrivelse.=", ".$r1['var_besk']; #.":".$r1['vt_besk'];
-		#			}
-		#		}
-		# exit;
+#			$varianter=explode(chr(9),$variant_type);
+#			for ($y=0;$y<count($varianter);$y++) {
+#				$qtxt="select variant_typer.beskrivelse as vt_besk,varianter.beskrivelse as var_besk from variant_typer,varianter";
+#				$qtxt.=" where variant_typer.id = '$varianter[$y]' and variant_typer.variant_id=varianter.id";
+#				$r1=db_fetch_array(db_select($qtxt,__FILE__ . " linje " . __LINE__));
+#				$beskrivelse.=", ".$r1['var_besk']; #.":".$r1['vt_besk'];
+#			}
+#		}
+# exit;
 		($webservice) ? $leveres = $antal : $leveres = 0;
 		if ($id && is_numeric($posnr)) {
 			$momslog = fopen("../temp/$db/momslog.log", "a");
@@ -4065,7 +4065,7 @@ function opret_ordrelinje($id, $vare_id, $varenr, $antal, $beskrivelse, $pris, $
 				alert($alerttxt);
 				$varemomssats = 0;
 				#				return ('0');
-				#				exit;
+#				exit;
 			}
 			if (($samlevare && !$antal) || $antal == '')
 				$antal = 1;
@@ -4088,7 +4088,7 @@ function opret_ordrelinje($id, $vare_id, $varenr, $antal, $beskrivelse, $pris, $
 			if ($lager < 1)
 				$lager = 1;
 			$posnr = abs($posnr); #20200813
-			#			if ($barcodeNew && !$serienr) $serienr = $barcodeNew;
+#			if ($barcodeNew && !$serienr) $serienr = $barcodeNew;
 			if ($art != 'PO' && $art != 'DK' && !$webservice && $variantText)
 				$beskrivelse .= " $variantText"; #20211129
 			$qtxt = "insert into ordrelinjer ";
@@ -5407,7 +5407,7 @@ function stock_warning_texts($sprog_id = null)
 	if ($en) {
 		return array(
 			'popup_title'         => 'Item out of stock',
-			'popup_text'          => 'This item is out of stock – do you still want to proceed with the sale?',
+			'popup_text'          => 'This item is out of stock - do you still want to proceed with the sale?',
 			'btn_no'              => 'No',
 			'btn_yes'             => 'Yes, continue',
 			'note_title'          => 'Reason required',
@@ -5419,8 +5419,8 @@ function stock_warning_texts($sprog_id = null)
 			'setting_label'       => 'Warn when selling out-of-stock items (popup + reason)',
 			'setting_title'       => 'Shows a popup and requires an approval note when an out-of-stock item is added to a POS or Debtor order. The approval is logged on the order.',
 			'banner_text'         => 'Out-of-stock sales',
-			'banner_suffix'       => 'approval(s) logged — click for details',
-			'log_heading'         => 'Out-of-stock sales — approvals',
+			'banner_suffix'       => 'approval(s) logged - click for details',
+			'log_heading'         => 'Out-of-stock sales - approvals',
 			'col_time'            => 'Time',
 			'col_employee'        => 'Employee',
 			'col_varenr'          => 'Item no.',
@@ -5431,7 +5431,7 @@ function stock_warning_texts($sprog_id = null)
 	}
 	return array(
 		'popup_title'         => 'Vare ikke på lager',
-		'popup_text'          => 'Denne vare er ikke på lager – ønsker du alligevel at fortsætte med salget?',
+		'popup_text'          => 'Denne vare er ikke på lager - ønsker du alligevel at fortsætte med salget?',
 		'btn_no'              => 'Nej',
 		'btn_yes'             => 'Ja, fortsæt',
 		'note_title'          => 'Begrundelse påkrævet',
@@ -5443,8 +5443,8 @@ function stock_warning_texts($sprog_id = null)
 		'setting_label'       => 'Advar ved salg af udsolgte varer (popup + begrundelse)',
 		'setting_title'       => 'Aktiverer popup-advarsel og krav om begrundelse ved salg af udsolgte varer i både POS og Debitor/Ordre. Godkendelsen logges på ordren.',
 		'banner_text'         => 'Salg af udsolgte varer',
-		'banner_suffix'       => 'godkendelse(r) loggede — klik for detaljer',
-		'log_heading'         => 'Salg af udsolgte varer — godkendelser',
+		'banner_suffix'       => 'godkendelse(r) loggede - klik for detaljer',
+		'log_heading'         => 'Salg af udsolgte varer - godkendelser',
 		'col_time'            => 'Tidspunkt',
 		'col_employee'        => 'Medarbejder',
 		'col_varenr'          => 'Varenr',
@@ -5454,13 +5454,11 @@ function stock_warning_texts($sprog_id = null)
 	);
 }
 
-
 function is_stock_warning_enabled()
 {
 	// Make sure the log table exists before any caller starts querying it.
-	// (Migration may not have run on older opdat versions — without this the
-	// missing relation generates PHP warnings that break print/PDF headers
-	// and crash the quick-invoice flow.)
+	// Migration may not have run on older databases; without this the missing
+	// relation can break print/PDF headers and quick-invoice flows.
 	if (function_exists('_sw_ensure_log_table')) _sw_ensure_log_table();
 	if (function_exists('get_settings_value')) {
 		return get_settings_value("stockWarningEnabled", "ordre", "off") === "on";
@@ -5469,8 +5467,6 @@ function is_stock_warning_enabled()
 	return ($r && $r['var_value'] === 'on');
 }
 
-// Self-healing schema check: creates order_stock_warning_log if it doesn't
-// exist yet. Cached so it only runs the existence query once per request.
 function _sw_ensure_log_table()
 {
 	static $checked = false;
@@ -5509,12 +5505,6 @@ function check_stock_warning($vare_id)
 	$result['beholdning']  = $r['beholdning'];
 	$result['min_lager']   = $r['min_lager'];
 	$gruppe = $r['gruppe'];
-	// STRICT trigger rule: the item must belong to a stock-tracked product
-	// group AND have beholdning <= 0. Items with positive stock -- even if
-	// below an explicit min_lager threshold -- are treated as "in stock" and
-	// added to the order line without a popup. This matches the literal
-	// user expectation: "if there's stock, it's in stock; if there isn't,
-	// require approval to sell anyway."
 	$r2 = db_fetch_array(db_select("select kodenr from grupper where art = 'VG' and box8 = 'on' and kodenr = '$gruppe'", __FILE__ . " linje " . __LINE__));
 	if ($r2 && (float)$r['beholdning'] <= 0) {
 		$result['out_of_stock'] = true;
@@ -5522,7 +5512,6 @@ function check_stock_warning($vare_id)
 	return $result;
 }
 
-// Persist an approval log entry for an out-of-stock sale.
 function log_stock_warning($ordre_id, $vare_id, $note, $linje_id = null)
 {
 	global $brugernavn;
