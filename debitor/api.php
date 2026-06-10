@@ -284,7 +284,7 @@
             file_put_contents("../temp/$db/fakture-curl-error-$ranStr.json", json_encode(['error' => $errorNumber, 'message' => $errorMessage, 'http_code' => $httpCode], JSON_PRETTY_PRINT));
             ?>
             <script>
-                alert("Forbindelsesfejl:\n\n<?php echo htmlspecialchars($errorMessage); ?>\n\nKontroller internetforbindelsen og prøv igen.");
+                alert('Forbindelsesfejl:\n\n<?= json_encode($errorMessage, JSON_PRETTY_PRINT); ?>\n\nKontroller internetforbindelsen og prøv igen.');
             </script>
             <?php
             curl_close($ch);
@@ -351,7 +351,7 @@
             
             ?>
             <script>
-                alert("Transmission fejl:\n\n<?= json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) ?>\n\nFejllogging gemt til debugging. Kontakt support hvis problemet persister.");
+                alert('Transmission fejl:\n\n<?= json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) ?>\n\nFejllogging gemt til debugging. Kontakt support hvis problemet persister.');
             </script>
             <?php
             exit;

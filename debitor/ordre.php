@@ -86,13 +86,13 @@
 // 20260509 PHR Hack to prevent order beeing created twice when using account lookup in to create the order.
 // 20260512 NTR MERGED Live/POS into PROD_TEST
 // 20260528 Sawaneh Stock warning popup skips already-saved lines and cache-busts stockWarning JS includes via filemtime
-// 20260610 CL/PHR Bilagsikon skiftet fra bilag.php til documents.php (source=debitorOrdrer)
 // 20260513 PHR Removed above hack as problen solved in includes/orderFuncIncludes/grid_account_lookup.php
 // 20260521 PHR changed '<' to '>' as negative qty was not possible
 // 20260528 PHR missing (float) created error
 // 20260603 CL/PHR Bilagsikon skiftet fra bilag.php til documents.php (source=debitorOrdrer)
 //                  migrateOldBilag.php inkluderet til automatisk migration af gamle bilag
 // 20260603 NTR Changed Varenr to posnr in SellerItemID in OIOUBL generation as per Jørgen's email.
+// 20260610 CL/PHR Bilagsikon skiftet fra bilag.php til documents.php (source=debitorOrdrer)
 // 20260611 LOE Added UI for hvem and updated its logic 
 @session_start();
 $s_id = session_id();
