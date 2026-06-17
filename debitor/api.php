@@ -137,6 +137,7 @@
         curl_close($ch);
 
         $timestamp = date("Y-m-d-H-i-s");
+
         if ($response === false || isset($response["error"]) || isset($response["errorNumber"]) || $response === null || trim($response) === "") {
             // An error occurred
             $errorNumber = curl_errno($ch);
@@ -309,9 +310,8 @@
             $errorNumber = curl_errno($ch);
             $errorMessage = curl_error($ch);
             $easyUBLError = isset($result["errorMessage"]) ? $result["errorMessage"] : "";
-            if (empty($easyUBLError) && isset($result["message"])) $easyUBLError = $result["message"];
             $errorDetails = isset($result["error"]) ? $result["error"] : "";
-
+            
             // 20260604 - Improved error logging for E-APS24003 errors
             // Capture all possible error information
             $error = [
@@ -321,14 +321,13 @@
                 'easyUBL_error' => $errorDetails,
                 'full_response' => $result
             ];
-
+            
             // save response in file in temp folder with full details for debugging
-            file_put_contents("../temp/$db/fakture-error-$randomString.json", json_encode($error, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)."\n".json_encode($data, JSON_UNESCAPED_UNICODE));
             error_log(json_encode($error, JSON_PRETTY_PRINT)."\n---SENT DATA---\n".json_encode($data, JSON_UNESCAPED_UNICODE));
-
+            
             // Determine which error to show
             $displayError = "";
-
+            
             if(!empty($errorMessage)){
                 // curl error
                 $displayError = "Forbindelsesfejl: " . $errorMessage;
@@ -344,7 +343,7 @@
             }else{
                 $displayError = "Ukendt fejl - kontakt support";
             }
-
+            
             ?>
             <script>
                 alert("Transmission fejl:\n\n<?= json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) ?>\n\nFejllogging gemt til debugging. Kontakt support hvis problemet persister.");
