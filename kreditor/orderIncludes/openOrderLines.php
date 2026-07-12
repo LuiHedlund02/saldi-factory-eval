@@ -203,6 +203,7 @@ if ($status>=1) {
     print "<input class='inputbox' type='text' style='width:90px;' name='batch_batch_no[$x]' value='$batch_batch_no_val' onchange='javascript:docChange = true;'></td>\n";
   }
 }
+}
 if ($omlev) {
   $txt = "<input class='inputbox' type='checkbox' style='background: none repeat scroll 0 0 #e4e4ee' ";
   $txt.= "name='omvbet[$x]' onchange='javascript:docChange = true;' $omvbet[$x]>";
