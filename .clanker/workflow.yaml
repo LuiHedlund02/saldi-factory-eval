@@ -1,0 +1,11 @@
+version: 1
+
+approvalRequiredFor:
+  - profile_change
+  - protected_path_change
+  - dependency_change
+  - github_actions_change
+  - deploy_config_change
+  - auth_or_security_code_change
+  - secret_handling_change
+  - merge

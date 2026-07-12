@@ -1,0 +1,19 @@
+version: 1
+
+required:
+  - id: php-syntax-simple
+    command: php -l debitor/pos_ordre_includes/report/xRapportData.php
+  - id: php-syntax-complex
+    command: php -l kreditor/ordre.php
+
+recommended: []
+
+protectedPaths:
+  - .github/**
+  - .clanker/**
+  - composer.json
+  - composer.lock
+
+characterizedPaths:
+  - debitor/pos_ordre_includes/report/xRapportData.php
+  - kreditor/ordre.php
